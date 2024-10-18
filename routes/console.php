@@ -9,5 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 Schedule::command('run:post')->everyMinute()->when(function () {
-    return now()->minute % 5 === 1; // ファイルの存在確実性のため、+1分遅延
+    return now()->minute % 5 === (int)env('AMESH_FETCH_DELAY_MINUTES', 1); // ファイルの存在確実性のために遅延
 });
