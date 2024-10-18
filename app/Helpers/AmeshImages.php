@@ -6,6 +6,7 @@ use App\Enums\Amesh\Count;
 use App\Enums\Amesh\Url;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation;
 
 class AmeshImages {
@@ -16,7 +17,7 @@ class AmeshImages {
     /** @var array<string> */
     protected array $mesh_filenames = [];
 
-    protected string $working_directory = '/tmp/';
+    protected string $working_directory = '/tmp/amesh_bot/';
 
     protected string $filepath_map = '';
     protected string $filepath_landmark = '';
@@ -57,6 +58,9 @@ class AmeshImages {
     }
 
     protected function _download_map() {
+        if (!File::exists($this->working_directory)) {
+            File::makeDirectory($this->working_directory);
+        }
         $this->filepath_map = $this->working_directory . Url::FILENAME_MAP->value;
         $this->_download(
             url: Url::URL_BASE->value . Url::URL_MAP->value . Url::FILENAME_MAP->value,
@@ -67,6 +71,9 @@ class AmeshImages {
     }
 
     protected function _download_mlandmark() {
+        if (!File::exists($this->working_directory)) {
+            File::makeDirectory($this->working_directory);
+        }
         $this->filepath_landmark = $this->working_directory . Url::FILENAME_MAP_LANDMARK->value;
         $this->_download(
             url: Url::URL_BASE->value . Url::URL_MAP->value . Url::FILENAME_MAP_LANDMARK->value,
@@ -77,6 +84,9 @@ class AmeshImages {
     }
 
     protected function _download_meshes() {
+        if (!File::exists($this->working_directory)) {
+            File::makeDirectory($this->working_directory);
+        }
         foreach ($this->mesh_filenames as $filename) {
             $this->_download(
                 url: Url::URL_BASE->value . Url::URL_HISTORICAL_MESH->value . $filename,
@@ -156,12 +166,6 @@ class AmeshImages {
     }
 
     public function cleanup(): bool {
-        unlink($this->filepath_map);
-        unlink($this->filepath_landmark);
-        foreach ($this->mesh_filenames as $filename) {
-            unlink($this->working_directory . $filename);
-        }
-
-        return true;
+        return File::deleteDirectory($this->working_directory);
     }
 }
